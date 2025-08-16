@@ -86,10 +86,10 @@ export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, 
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex items-center justify-center py-12 md:py-20">
         <div className="text-center">
-          <Loader className="h-12 w-12 text-echo-primary animate-spin mx-auto mb-4" />
-          <p className="text-echo-text-secondary">Loading your music library...</p>
+          <Loader className="h-10 w-10 md:h-12 md:w-12 text-echo-primary animate-spin mx-auto mb-3 md:mb-4" />
+          <p className="text-echo-text-secondary text-sm md:text-base">Loading your music library...</p>
         </div>
       </div>
     );
@@ -97,12 +97,12 @@ export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, 
 
   if (error) {
     return (
-      <div className="text-center py-20">
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 max-w-md mx-auto">
-          <p className="text-red-400 mb-4">{error}</p>
+      <div className="text-center py-12 md:py-20 px-4">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 md:p-6 max-w-md mx-auto">
+          <p className="text-red-400 mb-3 md:mb-4 text-sm md:text-base">{error}</p>
           <button
             onClick={fetchSongs}
-            className="bg-echo-primary text-echo-dark px-4 py-2 rounded-lg hover:bg-echo-accent transition-colors duration-200"
+            className="bg-echo-primary text-echo-dark px-3 md:px-4 py-2 rounded-lg hover:bg-echo-accent transition-colors duration-200 text-sm md:text-base"
           >
             Try Again
           </button>
@@ -117,12 +117,12 @@ export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
+        className="text-center mb-6 md:mb-8"
       >
-        <h2 className="text-3xl font-bold text-echo-text mb-3">
+        <h2 className="text-2xl md:text-3xl font-bold text-echo-text mb-2 md:mb-3">
           Your Music Library
         </h2>
-        <p className="text-lg text-echo-text-secondary">
+        <p className="text-base md:text-lg text-echo-text-secondary">
           {songs.length} uploaded tracks
         </p>
       </motion.div>
@@ -132,16 +132,16 @@ export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="mb-8"
+        className="mb-6 md:mb-8"
       >
-        <div className="relative max-w-md mx-auto">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-echo-text-secondary" />
+        <div className="relative max-w-md mx-auto px-4">
+          <Search className="absolute left-6 md:left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-echo-text-secondary" />
           <input
             type="text"
             placeholder="Search your library..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-lg bg-echo-gray border border-echo-primary/30 text-echo-text placeholder-echo-text-secondary focus:outline-none focus:ring-2 focus:ring-echo-primary focus:border-echo-primary transition-all duration-300"
+            className="w-full pl-10 md:pl-10 pr-4 py-3 rounded-lg bg-echo-gray border border-echo-primary/30 text-echo-text placeholder-echo-text-secondary focus:outline-none focus:ring-2 focus:ring-echo-primary focus:border-echo-primary transition-all duration-300 text-sm md:text-base"
           />
         </div>
       </motion.div>
@@ -151,14 +151,15 @@ export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
+        className="px-4"
       >
         {filteredSongs.length === 0 ? (
-          <div className="text-center py-20">
-            <Music className="h-16 w-16 text-echo-primary/40 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-echo-text mb-2">
+          <div className="text-center py-12 md:py-20">
+            <Music className="h-12 w-12 md:h-16 md:w-16 text-echo-primary/40 mx-auto mb-3 md:mb-4" />
+            <h3 className="text-lg md:text-xl font-semibold text-echo-text mb-2">
               {searchQuery ? 'No songs found' : 'No songs yet'}
             </h3>
-            <p className="text-echo-text-secondary">
+            <p className="text-echo-text-secondary text-sm md:text-base">
               {searchQuery 
                 ? 'Try adjusting your search terms'
                 : 'Upload your first song to get started!'
@@ -166,61 +167,61 @@ export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, 
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             {filteredSongs.map((song, index) => (
               <motion.div
                 key={song.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className={`bg-gradient-card border border-echo-primary/20 rounded-xl p-4 hover:shadow-soft transition-all duration-300 cursor-pointer ${
+                className={`bg-gradient-card border border-echo-primary/20 rounded-xl p-3 md:p-4 hover:shadow-soft transition-all duration-300 cursor-pointer ${
                   currentTrack?.id === song.id ? 'border-echo-primary/60 bg-echo-primary/5' : ''
                 }`}
                 onClick={() => handleTrackSelect(song)}
               >
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3 md:space-x-4">
                   {/* Album Art */}
-                  <div className="relative">
-                    <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
-                      <Music className="h-8 w-8 text-echo-white" />
+                  <div className="relative flex-shrink-0">
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
+                      <Music className="h-6 w-6 md:h-8 md:w-8 text-echo-white" />
                     </div>
                     
                     {/* Play/Pause Overlay */}
                     <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 rounded-lg flex items-center justify-center transition-opacity duration-300">
                       {currentTrack?.id === song.id && isPlaying ? (
-                        <Pause className="h-6 w-6 text-white" />
+                        <Pause className="h-4 w-4 md:h-6 md:w-6 text-white" />
                       ) : (
-                        <Play className="h-6 w-6 text-white" />
+                        <Play className="h-4 w-4 md:h-6 md:w-6 text-white" />
                       )}
                     </div>
                   </div>
 
                   {/* Song Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-echo-text truncate">
+                    <h3 className="text-base md:text-lg font-semibold text-echo-text truncate">
                       {song.title}
                     </h3>
-                    <p className="text-echo-text-secondary truncate">
+                    <p className="text-sm md:text-base text-echo-text-secondary truncate">
                       {song.artist}
                     </p>
-                    <p className="text-echo-text-secondary/70 text-sm truncate">
+                    <p className="text-xs md:text-sm text-echo-text-secondary/70 truncate">
                       {song.album}
                     </p>
                   </div>
 
                   {/* Metadata */}
-                  <div className="flex items-center space-x-6 text-echo-text-secondary text-sm">
+                  <div className="flex items-center space-x-3 md:space-x-6 text-echo-text-secondary text-xs md:text-sm flex-shrink-0">
                     <div className="flex items-center space-x-1">
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-3 w-3 md:h-4 md:w-4" />
                       <span>{formatDuration(song.duration)}</span>
                     </div>
                     {song.file_size && (
-                      <span>{formatFileSize(song.file_size)}</span>
+                      <span className="hidden sm:inline">{formatFileSize(song.file_size)}</span>
                     )}
                   </div>
 
                   {/* Play Button */}
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 flex-shrink-0">
                     <motion.button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -230,14 +231,14 @@ export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, 
                           handleTrackSelect(song);
                         }
                       }}
-                      className="bg-gradient-button text-echo-white p-3 rounded-full shadow-glow hover:shadow-soft transition-all duration-200"
+                      className="bg-gradient-button text-echo-white p-2 md:p-3 rounded-full shadow-glow hover:shadow-soft transition-all duration-200"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       {currentTrack?.id === song.id && isPlaying ? (
-                        <Pause className="h-5 w-5" />
+                        <Pause className="h-4 w-4 md:h-5 md:w-5" />
                       ) : (
-                        <Play className="h-5 w-5 ml-0.5" />
+                        <Play className="h-4 w-4 md:h-5 md:w-5 ml-0.5" />
                       )}
                     </motion.button>
                   </div>
