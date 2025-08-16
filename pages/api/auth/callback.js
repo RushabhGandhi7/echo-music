@@ -1,4 +1,4 @@
-import { exchangeCodeForTokens } from '../../../lib/spotify';
+import { exchangeCodeForToken } from '../spotify';
 import { setServerCookie, SPOTIFY_COOKIES } from '../../../utils/cookies';
 
 export default async function handler(req, res) {
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
     
     // Exchange code for tokens
-    const tokenData = await exchangeCodeForTokens(code, redirectUri);
+    const tokenData = await exchangeCodeForToken(code);
     
     const {
       access_token,

@@ -41,7 +41,7 @@ export default function SearchBar({ onTrackSelect, currentTrack, isPlaying, onPl
       }
 
       const data = await response.json();
-      setResults(data.tracks || []);
+      setResults(data.tracks?.items || []);
     } catch (error) {
       console.error('Search error:', error);
       setResults([]);
@@ -156,10 +156,10 @@ export default function SearchBar({ onTrackSelect, currentTrack, isPlaying, onPl
                     <div className="flex items-center space-x-4">
                       {/* Album Art */}
                       <div className="relative">
-                        {track.albumArt ? (
+                        {track.album?.images?.[0]?.url ? (
                           <img
-                            src={track.albumArt}
-                            alt={track.album}
+                            src={track.album.images[0].url}
+                            alt={track.album.name}
                             className="w-16 h-16 rounded-lg object-cover"
                           />
                         ) : (
@@ -181,19 +181,19 @@ export default function SearchBar({ onTrackSelect, currentTrack, isPlaying, onPl
                       {/* Track Info */}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-echo-text truncate">
-                          {track.title}
+                          {track.name}
                         </h3>
                         <p className="text-echo-text-secondary truncate">
-                          {track.artist}
+                          {track.artists?.map(a => a.name).join(', ')}
                         </p>
                         <p className="text-echo-text-secondary/70 text-sm truncate">
-                          {track.album}
+                          {track.album?.name}
                         </p>
                       </div>
 
                       {/* Duration */}
                       <div className="text-echo-text-secondary text-sm">
-                        {formatDuration(track.duration)}
+                        {formatDuration(track.duration_ms / 1000)}
                       </div>
 
                       {/* Play Button */}

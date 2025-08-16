@@ -194,10 +194,10 @@ export default function PlayerBar({ currentTrack, isPlaying, onPlayPause, onNext
               className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow"
               whileHover={{ scale: 1.05 }}
             >
-              {currentTrack.albumArt ? (
+              {currentTrack.album?.images?.[0]?.url ? (
                 <img
-                  src={currentTrack.albumArt}
-                  alt={currentTrack.album}
+                  src={currentTrack.album.images[0].url}
+                  alt={currentTrack.album.name}
                   className="w-16 h-16 rounded-xl object-cover"
                 />
               ) : currentTrack.isSpotify ? (
@@ -209,10 +209,10 @@ export default function PlayerBar({ currentTrack, isPlaying, onPlayPause, onNext
             
             <div className="min-w-0 flex-1">
               <h3 className="text-echo-text font-semibold truncate">
-                {currentTrack.title}
+                {currentTrack.name || currentTrack.title}
               </h3>
               <p className="text-echo-text-secondary truncate">
-                {currentTrack.artist}
+                {currentTrack.artists?.map(a => a.name).join(', ') || currentTrack.artist}
               </p>
               <p className="text-echo-text-secondary/70 text-sm truncate">
                 {currentTrack.album} • {activeTab === 'spotify' ? 'Spotify' : 'Uploaded'}

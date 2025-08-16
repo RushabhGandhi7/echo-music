@@ -1,4 +1,4 @@
-import { buildAuthUrl } from '../../../lib/spotify';
+import { getSpotifyAuthUrl } from '../spotify';
 
 export default function handler(req, res) {
   if (req.method !== 'GET') {
@@ -6,15 +6,7 @@ export default function handler(req, res) {
   }
 
   try {
-    const clientId = process.env.SPOTIFY_CLIENT_ID;
-    const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
-
-    if (!clientId || !redirectUri) {
-      return res.status(500).json({ error: 'Spotify configuration missing' });
-    }
-
-    const authUrl = buildAuthUrl(clientId, redirectUri);
-    
+    const authUrl = getSpotifyAuthUrl();
     res.redirect(authUrl);
   } catch (error) {
     console.error('Spotify login error:', error);

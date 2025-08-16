@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Music, Clock, Search, Loader } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 
 export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, onPlayPause }) {
   const [songs, setSongs] = useState([]);
@@ -26,28 +26,20 @@ export default function UploadLibrary({ onTrackSelect, currentTrack, isPlaying, 
       const { data, error: fetchError } = await supabase
         .from('songs')
         .select('*')
-        .order('uploaded_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
-      // Get public URLs for audio files
-      const songsWithUrls = await Promise.all(
-        data.map(async (song) => {
-          const { data: { publicUrl } } = supabase.storage
-            .from('music')
-            .getPublicUrl(song.file_path || song.url);
-
-          return {
-            ...song,
-            audioUrl: publicUrl,
-            isUploaded: true,
-            isSpotify: false,
-            artist: song.artist || 'Unknown Artist',
-            album: song.album || 'My Uploads',
-            duration: song.duration || 0
-          };
-        })
-      );
+      // Map songs to match our expected format
+      const songsWithUrls = data.map((song) => ({
+        ...song,
+        audioUrl: song.file_url,
+        isUploaded: true,
+        isSpotify: false,
+        artist: song.artist || 'Unknown Artist',
+        album: 'My Uploads',
+        duration: 0
+      }));
 
       setSongs(songsWithUrls);
     } catch (err) {

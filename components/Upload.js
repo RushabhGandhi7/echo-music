@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload as UploadIcon, Music, CheckCircle, AlertCircle, Cloud } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 
 export default function Upload({ onUpload }) {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -50,49 +50,26 @@ export default function Upload({ onUpload }) {
     setUploadMessage('Starting upload...');
 
     try {
-      // Generate unique filename
-      const timestamp = Date.now();
-      const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const filePath = `songs/${fileName}`;
-
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('music')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('music')
-        .getPublicUrl(filePath);
-
-      // Extract metadata from filename
+      // Create form data for upload
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Extract title from filename
       const title = file.name.replace('.mp3', '').replace(/[-_]/g, ' ');
-      const artist = 'Unknown Artist';
-      const album = 'My Uploads';
+      formData.append('title', title);
+      formData.append('artist', 'Unknown Artist');
 
-      // Create database record
-      const { data: songData, error: dbError } = await supabase
-        .from('songs')
-        .insert([
-          {
-            title,
-            artist,
-            album,
-            duration: 0,
-            file_path: filePath,
-            file_size: file.size,
-            url: publicUrl
-          }
-        ])
-        .select()
-        .single();
+      // Upload using our API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
 
-      if (dbError) throw dbError;
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
 
       setUploadProgress(100);
       setUploadStatus('success');
