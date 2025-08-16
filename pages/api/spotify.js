@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+// Spotify API integration - no Supabase needed for this file
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;

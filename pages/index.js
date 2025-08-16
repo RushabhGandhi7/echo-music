@@ -1,32 +1,44 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Music, Music2, Upload as UploadIcon, Play, Pause, Menu, X } from 'lucide-react';
+import { SpotifyProvider, useSpotify } from '../contexts/SpotifyContext';
 import SearchBar from '../components/SearchBar';
 import Upload from '../components/Upload';
 import UploadLibrary from '../components/UploadLibrary';
 import PlayerBar from '../components/PlayerBar';
 
-export default function Home() {
+function HomeContent() {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeSection, setActiveSection] = useState('search'); // 'search', 'upload', 'library'
   const [uploadReload, setUploadReload] = useState(false);
-  const [isSpotifyConnected, setIsSpotifyConnected] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  const { 
+    isAuthenticated, 
+    login, 
+    logout, 
+    currentTrack: spotifyTrack, 
+    isPlaying: spotifyIsPlaying,
+    togglePlayPause,
+    skipToNext,
+    skipToPrevious
+  } = useSpotify();
 
   useEffect(() => {
-    // Check if user is authenticated with Spotify
-    checkSpotifyAuth();
-  }, []);
-
-  const checkSpotifyAuth = async () => {
-    try {
-      const response = await fetch('/api/spotify/search?q=test');
-      setIsSpotifyConnected(response.ok);
-    } catch (error) {
-      setIsSpotifyConnected(false);
+    // Update local state when Spotify context changes
+    if (spotifyTrack) {
+      setCurrentTrack({
+        ...spotifyTrack,
+        isSpotify: true,
+        title: spotifyTrack.name,
+        artist: spotifyTrack.artists?.map(a => a.name).join(', '),
+        album: spotifyTrack.album?.name,
+        albumArt: spotifyTrack.album?.images?.[0]?.url
+      });
     }
-  };
+    setIsPlaying(spotifyIsPlaying);
+  }, [spotifyTrack, spotifyIsPlaying]);
 
   const handleTrackSelect = (track) => {
     setCurrentTrack(track);
@@ -34,17 +46,29 @@ export default function Home() {
   };
 
   const handlePlayPause = (playing) => {
-    setIsPlaying(playing);
+    if (currentTrack?.isSpotify) {
+      togglePlayPause();
+    } else {
+      setIsPlaying(playing);
+    }
   };
 
   const handleNext = () => {
-    // TODO: Implement queue management
-    console.log('Next track');
+    if (currentTrack?.isSpotify) {
+      skipToNext();
+    } else {
+      // TODO: Implement queue management for uploaded tracks
+      console.log('Next track');
+    }
   };
 
   const handlePrevious = () => {
-    // TODO: Implement queue management
-    console.log('Previous track');
+    if (currentTrack?.isSpotify) {
+      skipToPrevious();
+    } else {
+      // TODO: Implement queue management for uploaded tracks
+      console.log('Previous track');
+    }
   };
 
   const handleUploadSuccess = () => {
@@ -52,7 +76,7 @@ export default function Home() {
   };
 
   const handleSpotifyConnect = () => {
-    window.location.href = '/api/auth/login';
+    login();
   };
 
   const formatDuration = (seconds) => {
@@ -85,7 +109,7 @@ export default function Home() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
-              {!isSpotifyConnected && (
+              {!isAuthenticated ? (
                 <motion.button
                   onClick={handleSpotifyConnect}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
@@ -94,6 +118,16 @@ export default function Home() {
                 >
                   <Music2 className="h-5 w-5" />
                   <span>Connect Spotify</span>
+                </motion.button>
+              ) : (
+                <motion.button
+                  onClick={logout}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Music2 className="h-5 w-5" />
+                  <span>Disconnect</span>
                 </motion.button>
               )}
 
@@ -158,7 +192,7 @@ export default function Home() {
                 exit={{ opacity: 0, height: 0 }}
                 className="md:hidden mt-4 bg-echo-gray rounded-lg p-4 space-y-3"
               >
-                {!isSpotifyConnected && (
+                {!isAuthenticated ? (
                   <motion.button
                     onClick={handleSpotifyConnect}
                     className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
@@ -167,6 +201,16 @@ export default function Home() {
                   >
                     <Music2 className="h-5 w-5" />
                     <span>Connect Spotify</span>
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    onClick={logout}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Music2 className="h-5 w-5" />
+                    <span>Disconnect Spotify</span>
                   </motion.button>
                 )}
 
@@ -224,7 +268,7 @@ export default function Home() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {!isSpotifyConnected ? (
+              {!isAuthenticated ? (
                 <div className="text-center py-12 md:py-20">
                   <Music2 className="h-16 w-16 md:h-24 md:w-24 text-echo-primary/40 mx-auto mb-4 md:mb-6" />
                   <h2 className="text-2xl md:text-3xl font-bold text-echo-text mb-3 md:mb-4">
@@ -296,5 +340,13 @@ export default function Home() {
         onPrevious={handlePrevious}
       />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <SpotifyProvider>
+      <HomeContent />
+    </SpotifyProvider>
   );
 }

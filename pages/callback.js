@@ -15,23 +15,42 @@ export default function Callback() {
     }
 
     if (code) {
-      // Exchange code for token
-      fetch('/api/auth/callback?' + new URLSearchParams({ code }))
-        .then(response => {
-          if (response.ok) {
-            setStatus('Authentication successful! Redirecting...');
-            setTimeout(() => router.push('/'), 2000);
-          } else {
-            throw new Error('Token exchange failed');
-          }
-        })
-        .catch(error => {
-          console.error('Callback error:', error);
-          setStatus('Authentication failed. Please try again.');
-          setTimeout(() => router.push('/'), 3000);
-        });
+      handleTokenExchange(code);
     }
   }, [router.query, router]);
+
+  const handleTokenExchange = async (code) => {
+    try {
+      setStatus('Exchanging authorization code...');
+      
+      // Exchange code for tokens
+      const response = await fetch('/api/auth/callback?' + new URLSearchParams({ code }));
+      
+      if (!response.ok) {
+        throw new Error('Token exchange failed');
+      }
+
+      const data = await response.json();
+      
+      if (data.access_token) {
+        // Store tokens in localStorage
+        const expiresAt = Date.now() + (data.expires_in * 1000);
+        
+        localStorage.setItem('spotify_access_token', data.access_token);
+        localStorage.setItem('spotify_refresh_token', data.refresh_token);
+        localStorage.setItem('spotify_token_expires_at', expiresAt.toString());
+
+        setStatus('Authentication successful! Redirecting...');
+        setTimeout(() => router.push('/'), 2000);
+      } else {
+        throw new Error('No access token received');
+      }
+    } catch (error) {
+      console.error('Callback error:', error);
+      setStatus('Authentication failed. Please try again.');
+      setTimeout(() => router.push('/'), 3000);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex items-center justify-center">

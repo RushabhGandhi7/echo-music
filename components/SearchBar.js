@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Play, Pause, Music, Music2, Loader } from 'lucide-react';
+import { useSpotify } from '../contexts/SpotifyContext';
 
 export default function SearchBar({ onTrackSelect, currentTrack, isPlaying, onPlayPause }) {
   const [query, setQuery] = useState('');
@@ -8,6 +9,8 @@ export default function SearchBar({ onTrackSelect, currentTrack, isPlaying, onPl
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const searchTimeoutRef = useRef(null);
+  
+  const { searchTracks, playTrack } = useSpotify();
 
   useEffect(() => {
     // Clear timeout on unmount
@@ -29,18 +32,7 @@ export default function SearchBar({ onTrackSelect, currentTrack, isPlaying, onPl
     setHasSearched(true);
 
     try {
-      const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(searchQuery)}`);
-      
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Token expired, redirect to login
-          window.location.href = '/api/auth/login';
-          return;
-        }
-        throw new Error('Search failed');
-      }
-
-      const data = await response.json();
+      const data = await searchTracks(searchQuery);
       setResults(data.tracks?.items || []);
     } catch (error) {
       console.error('Search error:', error);
@@ -69,8 +61,16 @@ export default function SearchBar({ onTrackSelect, currentTrack, isPlaying, onPl
     }
   };
 
-  const handleTrackSelect = (track) => {
-    onTrackSelect(track);
+  const handleTrackSelect = async (track) => {
+    try {
+      // Play the track using Spotify Web Playback SDK
+      await playTrack(track.uri);
+      onTrackSelect(track);
+    } catch (error) {
+      console.error('Error playing track:', error);
+      // Fallback to just selecting the track
+      onTrackSelect(track);
+    }
   };
 
   const formatDuration = (seconds) => {
